@@ -1,0 +1,40 @@
+<!Doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>코인 Test</title>
+        <style>
+            svg {
+                width: 80px;
+                height: 80px;
+                background-color: white;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="./src/jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="./script/wallet.js"></script>
+    </head>
+    <body>
+        <div>
+            <span id="input_html"></span>
+        </div>
+        <div>
+            <form method="POST" action="wire"> 
+                <input type="text" placeholder="입력하세요" name="input_word"  /> 
+                <input type="submit" value="송금" onclick="chkWord();"/>
+            </form>
+            <table>
+                <body>
+                    <tr>
+                        <div id="qrcode" width="25px" height="25px"></div>
+                    </tr>
+                </body>
+            </table>
+        </div>
+            <input type="button" id="delete_wallet" value="지갑삭제""/>
+        <div>
+        </div>
+    </body>
+</html>

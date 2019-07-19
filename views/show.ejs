@@ -1,0 +1,26 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>코인 Test</title>
+    <script type="text/javascript">
+    window.addEventListener('error', function(e) {
+        console.log(e);
+    }, true);
+    </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./src/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="./script/show.js"></script>
+</head>
+<body>
+    <div>
+        <span id="list_mnemonic"></span>
+    </div>
+    <div>
+        <input type="button" id="gen_words" value="재생성" />
+        <input type="button" id="next" value="다음" />
+    </div>
+</body>
+</html>

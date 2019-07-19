@@ -1,0 +1,9 @@
+{
+  "dbsettings": {
+    "user": "admin",
+    "password": "admin",
+    "database": "walletapi",
+    "address": "localhost",
+    "port": 27017
+  }
+}
