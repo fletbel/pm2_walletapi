@@ -6,28 +6,48 @@ const client = require('../models/client');
 // const client = require('../models/client.js');
 
 
-function Wallet(mnemonic, bip44Idx) {
-
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
-    const bitcoinNetwork = client.tbsys;
-    const hdMaster = bitcoin.bip32.fromSeed(seed, bitcoinNetwork);
-    const key = hdMaster.derivePath("m/44'/1'/0'/0/0");
-    const keyWIF = key.toWIF();
-    const keyAddr = getAddress(key, bitcoinNetwork);
-    return {
-        key: key,
-        keyWIF: keyWIF,
-        address: keyAddr
-    }
-}
 
 
 // function wallet(mnemonic) {
-module.exports = Wallet;
+module.exports = function(mnemonic, bip44Idx) {
+    return new Promise(resolve => {
+        const seed = bip39.mnemonicToSeedSync(mnemonic);
+        const bitcoinNetwork = client.tbsys;
+        const hdMaster = bitcoin.bip32.fromSeed(seed, bitcoinNetwork);
+        const key = hdMaster.derivePath("m/44'/1'/0'/0/0");
+
+        // const xpubString = key.neutered().toBase58(); // xpub~
+        // const keyPair = key.keyPair;
+        // console.log('\n=====key before key.towif: ');
+        // console.log(key);
+
+        const keyWIF = key.toWIF();
+        // console.log('\nkeyWIF: ');
+        // console.log(keyWIF);
+        const keyAddr = getAddress(key, bitcoinNetwork);
+        // return {
+        //     key: key,
+        //     keyWIF: keyWIF,
+        //     address: keyAddr
+        // }
+        resolve({
+            key: key,
+            keyWIF: keyWIF,
+            address: keyAddr
+        });
+    });
+}
 
 function getAddress(node, network) {
-    return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address
+    return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network: network }).address // network: network?
 }
+
+
+
+
+
+
+
 //  // const mnemonic = bip39.generateMnemonic();
 //     // const mnemonic = "body lamp morning brass paddle copy deputy there course civil mammal yard";
 //     // addr: mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf

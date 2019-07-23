@@ -14,7 +14,7 @@ const tbsys = {
 
 const client = new Client({
     network: tbsys.network,
-    host: '104.25.219.24',
+    host: 'testnet.bsysexplorer.com',
     port: 28293,
     username: 'user',
     password: '',

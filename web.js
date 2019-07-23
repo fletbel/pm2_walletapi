@@ -4,12 +4,15 @@ const bodyParser = require('body-parser');
 
 const client = require('./models/client.js')
 const dhttp = require('dhttp/200.js')
+const http = require('http');
 const path = require('path');
 const wallet = require('./public/wallet');
 const mnemonic = require('./public/mnemonic');
 const tx = require('./public/tx');
 const qr = require('./public/qr');
 const db = require("./libs/database");
+const httpRequest = require("./libs/http");
+
 const mongoose = require('mongoose');
 
 const bitcoin = require('bitcoinjs-lib');
@@ -58,8 +61,9 @@ app.get('/', (req, res) => {
         if (result && result.auth)
             res.render('wallet');
         else if (result && !result.auth && result.data) {
-            db.drop(collection);
-            res.redirect('/');
+            db.drop(collection).then(() => {
+                res.redirect('/');
+            });
         } else
             res.render('index', {
                 mnemonic: result
@@ -73,7 +77,9 @@ app.post('/init_mnemonic', (req, res) => {
     delete Mnemonic;
     db.find('mnemonic').then((result) => {
         if (result != null)
-            db.drop('mnemonic');
+            db.drop('mnemonic').then(() => {
+                res.redirect('/');
+            });
         db.insertMany('mnemonic', {
             data: mnemonicWords
         });
@@ -95,7 +101,7 @@ app.post('/wallet', (req, res) => {
         const mnemonic = result;
         if (result) {
             const wordsArr = mnemonic.data.split(' ');
-            for (var value of wordsArr)
+            for (let value of wordsArr)
                 if (value == req.body.input_word)
                     status = 'success';
         } else
@@ -139,32 +145,99 @@ app.post('/get_mnemonic', (req, res) => {
 
 app.post('/create_wallet', (req, res) => {
     db.find('mnemonic').then((result) => {
-        const Wallet = new wallet(result.data, 0);
-        // console.log('\nWallet: ');
-        // console.log(Wallet);
-        res.json(Wallet);
-        delete Wallet;
+        // const Wallet = new wallet(result.data, 0);
+        wallet(result.data, 0).then((result) => {
+            console.log(result);
+
+            res.json(result);
+        });
+        // delete Wallet;
     });
 });
 
-// 
+app.get('/delete_wallet', function(req, res) {
+    console.log('delete_wallet called');
+
+    deleteCollection('mnemonic');
+    deleteCollection('wallet');
+    deleteCollection('address');
+
+    function deleteCollection(collection) {
+        db.find(collection).then((result) => {
+            if (result)
+                db.drop(collection).then(() => {
+                    return true;
+                });
+            else
+                return true;
+        });
+    }
+});
 
 app.post('/qr', function(req, res) {
     const qrString = qr(req.body.addr);
     res.json(qrString);
 });
 
+// mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
 app.post('/wire', function(req, res) {
-    db.find('wallet').then((result) => {
-        let a = tx(result);
-        console.log('tx result');
-        console.log(a);
+    console.log('wire');
+    console.log('\namount: ' + req.body.amount);
+    console.log('req.body.addr: ' + req.body.addr);
+    db.find('mnemonic').then((mnemonic) => {
+        wallet(mnemonic.data, 0).then((wallet) => {
+            const url = '/new/getutxos/' + wallet.address;
+            httpRequest.request(url).then((utxo) => {
+                tx(wallet, req.body.addr, req.body.amount, utxo).then((tx) => {
+                    // console.log('\nwallet.address: ');
+                    // console.log(wallet.address);
+                    // console.log('\ntx: ');
+                    // console.log(tx);
+                    httpRequest.sendTx(wallet.address, tx).then((result) => {
+                        res.json({ data: result });
+                    }).catch((err) => {
+                        console.error(err);
+                    });
+                }).catch((err) => {
+                    console.error(err);
+                });
+            }).catch((err) => {
+                console.error(err);
+            });;
 
-        const dstAddr = "mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd";
-        const pubKey = result.keyWIF;
-    })
-    res.json('wire success');
+        }).catch((err) => {
+            console.error(err);
+        });;
+    }).catch((err) => {
+        console.error(err);
+    });;
 });
+
+app.post('/request_data', function(req, res) {
+    const address = req.body.data;
+    const url = req.body.url;
+    // const url = '/new/getutxos/' + address
+    httpRequest.request(url).then((utxo) => {
+        res.json(JSON.parse(utxo));
+    });
+});
+
+app.post('/get_utxo', function(req, res) {
+    const address = req.body.data;
+    const url = '/new/getutxos/' + address
+    httpRequest.request(url).then((utxo) => {
+        res.json(JSON.parse(utxo));
+    });
+});
+
+app.post('/get_balance', function(req, res) {
+    const address = req.body.data;
+    const url = '/new/getbalance/' + address
+    httpRequest.request(url).then((balance) => {
+        res.json(JSON.parse(balance));
+    });
+});
+
 
 app.listen(8123, () => {
     console.log('Listening on port 8123');

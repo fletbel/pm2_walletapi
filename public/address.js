@@ -18,11 +18,11 @@ function createAddress(collection, string) {
     // const bitcoinNetwork = bitcoin.networks.testnet;
     const bitcoinNetwork = tbsys;
     const hdMaster = bitcoin.bip32.fromSeed(seed, bitcoinNetwork);
-    console.log(JSON.stringify(hdMaster));
+    // console.log(JSON.stringify(hdMaster));
     const key1 = hdMaster.derivePath("m/44'/1'/0'/0/0");
     const key2 = hdMaster.derivePath("m/44'/1'/0'/0/1");
-    console.log('\n key1:' + JSON.stringify(key1));
-    console.log('\n key2:' + JSON.stringify(key2));
+    // console.log('\n key1:' + JSON.stringify(key1));
+    // console.log('\n key2:' + JSON.stringify(key2));
 
     const key1WIF = key1.toWIF();
     const key2WIF = key2.toWIF();
@@ -42,7 +42,7 @@ function createAddress(collection, string) {
     // const utxo = '9defc442eab7be8304219c7f6085ba805651753dbbe10f5f8e4b26c5130c30c3';
 
     // console.log('\nbitcoin.networks.testnet' + JSON.stringify(bitcoin.networks.testnet));
-    console.log('\ntbsys: ' + JSON.stringify(tbsys));
+    // console.log('\ntbsys: ' + JSON.stringify(tbsys));
 }
 
 

@@ -36,9 +36,12 @@ module.exports = {
     },
 
     drop: (collection) => {
-        mongoose.connection.collection(collection).drop(function(err, delState) {
-            if (err) throw err;
-            if (delState) console.log("Collection deleted");
+        return new Promise(resolve => {
+            mongoose.connection.collection(collection).drop(function(err, delState) {
+                if (err) throw err;
+                if (delState) console.log("Collection deleted");
+                resolve();
+            });
         });
     },
 

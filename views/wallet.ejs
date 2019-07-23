@@ -15,15 +15,27 @@
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
         <script type="text/javascript" src="./src/jquery-3.3.1.min.js"></script>
         <script type="text/javascript" src="./script/wallet.js"></script>
+        <script type="text/javascript" src="../time.js"></script>
     </head>
     <body>
         <div>
-            <span id="input_html"></span>
+            <span id="html_wallet_info"></span>
+        </div>
+         <div>
+            <span id="html_balance"></span>
+        </div>
+        <div>
+            <span id="html_utxo"></span>
+        </div>
+        <br>
+         <div>
+            <span id="html_txhistory"></span>
         </div>
         <div>
             <form method="POST" action="wire"> 
-                <input type="text" placeholder="입력하세요" name="input_word"  /> 
-                <input type="submit" value="송금" onclick="chkWord();"/>
+                <input type="text" placeholder="지갑주소" id="html_input_address" name="addr" style="width:400px;height:30px;" /> 
+                <input type="text" placeholder="송금액(satoshis)" id="html_input_balance" name="amount" style="width:100px;height:30px;" /> 
+                <input type="submit" value="송금" id="html_wire" />
             </form>
             <table>
                 <body>
