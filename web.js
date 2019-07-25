@@ -181,20 +181,26 @@ app.post('/qr', function(req, res) {
 
 // mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
 app.post('/wire', function(req, res) {
-    console.log('wire');
-    console.log('\namount: ' + req.body.amount);
-    console.log('req.body.addr: ' + req.body.addr);
+    console.log('\n/wire bodyparser values');
+    console.log(req.body.amount);
+    console.log(req.body.address);
     db.find('mnemonic').then((mnemonic) => {
         wallet(mnemonic.data, 0).then((wallet) => {
             const url = '/new/getutxos/' + wallet.address;
             httpRequest.request(url).then((utxo) => {
-                tx(wallet, req.body.addr, req.body.amount, utxo).then((tx) => {
-                    // console.log('\nwallet.address: ');
-                    // console.log(wallet.address);
-                    // console.log('\ntx: ');
-                    // console.log(tx);
-                    httpRequest.sendTx(wallet.address, tx).then((result) => {
-                        res.json({ data: result });
+                tx(wallet, req.body.address, req.body.amount, utxo).then((dataResult) => {
+
+                    // res.json({
+                    //     addr: wallet.address,
+                    //     hex: dataResult
+                    // });
+
+                    console.log('\n getWalletAddress: ' + wallet.address);
+                    httpRequest.sendTx(wallet.address, dataResult).then((result) => {
+                        // console.log(reasult);
+                        res.json({
+                            data: result
+                        });
                     }).catch((err) => {
                         console.error(err);
                     });
@@ -274,12 +280,9 @@ function getParams() {
 // [트랜잭션 전송]
 // /new/sendtx
 // {
-//   "address":[address],
-//   "hexstring":[hexstring]
+//   "addr":[address],
+//   "hex":[hexstring]
 // }
-
-
-
 
 // [balance]
 // https://testnet.bsysexplorer.com/new/getbalance/mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf
@@ -298,12 +301,6 @@ function getParams() {
 // [sendtx] - post
 // https://testnet.bsysexplorer.com/new/sendtx/
 
-
-// body
-// {
-// 	"hexstring":"01000000~~~~",
-// 	"from":"mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf"
-// }
 
 
 // key1.towif():L2TXXS3o9SawrqRc2xUQmfGdu5VGXpmvNZp1uUBupgWJc3JEguQb
@@ -560,16 +557,69 @@ console.log(tx.build().toHex());
     key1Addr:   mVVamVY3H2MpQAwEzRr5MSdaztGZe5oYVA
 
 
+    *트랜잭션 생성
+    생성된 주소와 pubkey, bitcoin network의 hash를 이용해 트랜잭션을 생성
+
+    트랜잭션은 input과 output으로 나뉘는데
+    input엔 utxo와 utxo의 vout, output엔 내보낼 주소와 비트코인 양(amount)가 파라미터로 입력된다.
+
+    먼저 트랜잭션 빌드를 위해 트랜잭션 빌더를 생성
+
+    const txb = new bitcoin.TransactionBuilder(client.tbsys);
+
+    이후 생성된 txb에 인풋과 아웃풋을 설정 해 준다
+
+    txb.addInput(selectedUtxo.txid, selectedUtxo.vout); //tx from testnet
+
+    아웃풋엔 내가 보내고싶은 wallet address를 아웃풋으로 설정하고 보낼 양(amount)을 입력한다.
+    이 양은 선택된 utxo의 amount보단 당연히 높아선 안되며 amount를 설정하고 남은 양은
+    fee를 계산 해 fee를 제외한 나머지를 내 주소로 다시 전송하는 방식.
+
+    즉 내 지갑의 utxo에서 받는사람의 지갑으로 100코인에서 40을 보냈다면
+    내 주소로는 100에서 40을 뺀 60을 다시 받는데 fee를 제외한 59.9995를 받게 된다(fee가 0.0005라면)
+
+    이를 output으로 둘 다 입력한 것이 아래
+
+    txb.addOutput(wallet.address, (selectedUtxo.satoshis - Number(amount) - fee));
+    txb.addOutput(dstAddr, Number(amount)); //dst addr, satoshi
+
+    이후 생성된 트랜잭션을 sign하고 hexdecimal로 변환하면 트랜잭션이 완성
+    key는 내 wallet 주소에 아까 생성 한 
+    hdMaster.derivePath("m/44'/1'/0'/0/0"); 에 해당하는 키 이다.
+    txb.sign(0, wallet.key) 
+    let tx = txb.build().toHex();
+
+    생성된 트랜잭션은 http post로 bsys testnet에 전송하면 테스트넷에 업로드 된다.
+    
+    bsys testnet에 post전송하는 option
+
+    new/sendtx를 찾지 못한다면 testnet 서버의 라우터의 이름을 물어볼 것.
+    method는 post로 설정하고, headers의 application/json은 body의 data가 json인 경우
+    자동으로 설정.
+
+    option {
+        url: 'https://testnet.bsysexplorer.com/new/sendtx', 
+        hostname: 'testnet.bsysexplorer.com',
+        path: '/new/sendtx/',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: data,
+        json: true
+    }
+    data {
+        addr: my_wallet_address,
+        hex: txid_we_made
+    }
     */
 
 
 /* 
-1. 데이터베이스를 이용해야하는지
-2. 데이터베이스를 이용하면 유저 로그인용 비밀번호를 db에 저장하는지
-3. 데이터베이스에 tx리스트와 블록, utxo 등을 저장해야하는지
-4. bsys테스트넷과 rpc통신시 bitcoin-core를 이용하는지
-5. bsys config파일을 이용해서 비밀번호 아이디를 써야하는지
-6. utxo로 트랜잭션 생성시 알고리즘
+1. 데이터베이스를 이용해야하는지 // x
+2. 데이터베이스를 이용하면 유저 로그인용 비밀번호를 db에 저장하는지 // ?
+3. 데이터베이스에 tx리스트와 블록, utxo 등을 저장해야하는지 // x
+4. bsys테스트넷과 rpc통신시 bitcoin-core를 이용하는지 // x
+5. bsys config파일을 이용해서 비밀번호 아이디를 써야하는지 // ?
+6. utxo로 트랜잭션 생성시 알고리즘 // x
     
 */
 
@@ -643,29 +693,6 @@ console.log(tx.build().toHex());
 //     console.log('transfer successful')
 // }
 // sendBTC(key1Addr, key1WIF, 1, txid)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

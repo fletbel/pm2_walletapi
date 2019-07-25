@@ -3,57 +3,32 @@ const bip32 = require('bip32');
 const bip39 = require('bip39');
 const assert = require('assert');
 const client = require('../models/client');
+const httpRequest = require('../libs/http');
 
-
-module.exports = function(wallet, dstAddr, amount, utxo) {
+// function createTx(wallet, dstAddr, amount, utxo) {
+module.exports = (wallet, dstAddr, amount, utxo) => {
     return new Promise(resolve => {
-        // const utxoSearched = getFinestUtxo(utxo, amount);
-
-        // const utxoSearched = computeChange(JSON.parse(utxo).Contents, amount);
-        // console.log('\nutxoSearched: ');
-        // console.log(utxoSearched);
+        // console.log('\n tx.js createTx parameters');
+        // console.log('\n wallet: ' + JSON.stringify(wallet));
+        // console.log('\n dstAddr: ' + dstAddr);
+        // console.log('\n amount: ' + amount);
+        // console.log('\n utxo: ' + utxo);
+        const fee = 100000;
         let selectedUtxo = JSON.parse(utxo).Contents;
         selectedUtxo = selectedUtxo[0];
-        // console.log('\nselectedUtxo: ');
-        // console.log(selectedUtxo[0]);
+
         const txb = new bitcoin.TransactionBuilder(client.tbsys);
-        // console.log(client.tbsys.pubKeyHash);
-
-        // const txb = new bitcoin.TransactionBuilder(client.tbsys);
-        // console.log(client.tbsys.pubKeyHash);
-
-        // //args : utxo, utxo vout
-        // txb.addInput('448dc99498969a010c2741f370783bf921187e88164147783aca7617df8f590f', 0); //tx from testnet
-
-        // // console.log(txb);
-        // txb.addOutput('mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf', 10000000000 - amount);
-        // txb.addOutput('mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd', 10000); //dst addr, satoshi
-
-        console.log('\nselectedUtxo.txid: ' + selectedUtxo.txid);
-        console.log('\nselectedUtxo.vout: ' + selectedUtxo.vout);
-        console.log('\nwallet.address: ' + wallet.address);
-        console.log('\nselectedUtxo.satoshis - amount: ' + (selectedUtxo.satoshis - Number(amount)));
-
 
         //args : utxo, utxo vout
         txb.addInput(selectedUtxo.txid, selectedUtxo.vout); //tx from testnet
-
-        // console.log(txb);
-        txb.addOutput(wallet.address, (selectedUtxo.satoshis - Number(amount)));
+        txb.addOutput(wallet.address, (selectedUtxo.satoshis - Number(amount) - fee));
         txb.addOutput(dstAddr, Number(amount)); //dst addr, satoshi
 
+        // console.log('\naddoutputSuccess: ' + dstAddr + ' ' + Number(amount));
         const privKey = wallet.keyWIF;
-        // const pubKey = wallet.key.getAddress();
-        // console.log('\ntbsys: ');
-        // console.log(client.tbsys);
-        // const keyPair = bitcoin.ECPair.fromWIF(wallet.keyWIF, client.tbsys);
-        // console.log('\nprivkey: ' + privKey);
         txb.sign(0, wallet.key)
-            // txb.sign(0);
-
         let tx = txb.build().toHex();
-        console.log('\ntx: ');
-        console.log(tx);
+
         resolve(tx);
     });
 }
@@ -84,8 +59,6 @@ function computeChange(coins, amount) {
     return coincount;
 }
 
-
-
 function rightJustify(s, w) {
     // return a string of width w with s in the rightmost characters and
     // at least one space on the left. For simplicity, assume w < 20.
@@ -93,7 +66,6 @@ function rightJustify(s, w) {
     var blanks = "                    "
     return blanks.substr(0, Math.min(20, Math.max(1, w - slen))) + s;
 }
-
 
 function makeChange() {
     // compute change as an array: each element of change tells
@@ -149,30 +121,78 @@ function getFinestUtxo(utxo, amount) {
             let utxoArr = utxo.filter((id) => {
                 return id.satoshis >= amount;
             });
-            // utxo.satoshis.forEach((amount) => {
-            //     if (this.amount >= amount)
-            //         utxoArr.push(this);
-            // });
-            // Math.max.apply(Math, array.map((o)=> { return o.y; }));
             const dataArray = new Array;
             for (let satoshis in utxo) {
                 dataArray.push(utxo[satoshis]);
             }
-
             resolve(dataArray);
         });
     };
 
-    // let utxoArr = utxo.filter((id) => {
-    //     return id.satoshis >= amount;
-    // });
     abandonLowAmountUtxo(JSON.parse(utxo).Contents).then((result) => {
         console.log('\nabandonLowAmountUtxo result: ');
         console.log(result);
     });
-
 }
 
+
+
+
+// const utxoSearched = computeChange(JSON.parse(utxo).Contents, amount);
+// console.log('\nutxoSearched: ');
+// console.log(utxoSearched);
+
+// console.log('\nselectedUtxo: ');
+// console.log(selectedUtxo[0]);
+
+// console.log(client.tbsys.pubKeyHash);
+
+// const txb = new bitcoin.TransactionBuilder(client.tbsys);
+// console.log(client.tbsys.pubKeyHash);
+
+// //args : utxo, utxo vout
+// txb.addInput('448dc99498969a010c2741f370783bf921187e88164147783aca7617df8f590f', 0); //tx from testnet
+
+// // console.log(txb);
+// txb.addOutput('mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf', 10000000000 - amount);
+// txb.addOutput('mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd', 10000); //dst addr, satoshi
+
+// console.log('\nNumber(amount): ' + Number(amount));
+
+// console.log('\nselectedUtxo.txid: ' + selectedUtxo.txid);
+// console.log('\nselectedUtxo.vout: ' + selectedUtxo.vout);
+// console.log('\nwallet.address: ' + wallet.address);
+// console.log('\nselectedUtxo.satoshis - amount: ' + (selectedUtxo.satoshis - Number(amount)));
+
+// console.log(txb);
+// console.log('\nprint type: ' + typeof(wallet.address) + ' ' + typeof(amount) + ' ' + amount)
+
+// const pubKey = wallet.key.getAddress();
+// console.log('\ntbsys: ');
+// console.log(client.tbsys);
+// const keyPair = bitcoin.ECPair.fromWIF(wallet.keyWIF, client.tbsys);
+// console.log('\nprivkey: ' + privKey);
+
+// txb.sign(0);
+
+// console.log('\ntx: ');
+// console.log(tx);
+
+// const sendTxResult = sendTx();
+// resolve(sendTxResult());
+
+
+
+
+// function sendTx() {
+//     httpRequest.sendTx(getWalletAddress, txResult).then((result) => {
+//         return result;
+//     });
+// }
+
+// module.exports = {
+//     createTx: createTx
+// };
 
 // let utxoArr = "";
 // utxo.forEach((amount) => {

@@ -1,6 +1,7 @@
 const request = require('request');
 const client = require('../models/client');
-
+// const http = require('http');
+// var sa = require('superagent');
 module.exports = {
     request: function(url) {
         return new Promise(resolve => {
@@ -13,39 +14,140 @@ module.exports = {
     },
     sendTx: function(address, tx) {
         return new Promise(resolve => {
-            console.log('\nhttp sendtx data: ');
-            console.log('\naddress: ' + address);
-            console.log('\ntx: ' + tx);
-            const addr = address;
-            const hex = tx;
-            const url = 'https://' + client.client.host + '/new/sendtx';
+            const uri = 'https://' + client.client.host + '/new/sendtx/';
 
+            console.log('\n http request parameters: ');
+            console.log('\n address: ' + address);
+            console.log('\n tx: ' + tx);
+            console.log('\n uri: ' + uri);
+
+            const data = {
+                addr: address,
+                hex: tx,
+            };
+            const httpURI = 'https://testnet.bsysexplorer.com';
             const options = {
-                headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                json: {
-                    addr: address,
-                    hex: tx,
-                },
-                url: url,
+                // uri: uri,
+                url: 'https://testnet.bsysexplorer.com/new/sendtx',
+                hostname: 'testnet.bsysexplorer.com',
+                path: '/new/sendtx/',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: data,
                 json: true
-            }
-            request.post(options, function(error, response, body) {
-                console.log('\n url: ' + 'https://' + client.client.host + '/new/sendtx');
+            };
 
-                if (error)
-                    console.error(error);
-                // console.log('\nresponse: ');
-                // console.log(response);
-                console.log('\nbody: ');
-                console.log(body);
-                console.log('\noptions: ');
+            const a = request(options, function(error, response, body) {
+                if (error) {
+                    console.log('\n Request post error: ' + error);
+                    throw error;
+                }
+
+                console.log('\n headers: ');
+                console.log(response.headers);
+                console.log('\n statusCode: ');
+                console.log(response.statusCode);
+
+                console.log('\n options: ');
                 console.log(options);
-                return body;
+                resolve(body);
             });
+
+
+            // var body = JSON.stringify({
+            //     foo: "bar"
+            // })
+
+            // var request = new http.ClientRequest({
+            //     hostname: "SERVER_NAME",
+            //     port: 80,
+            //     path: "/get_stuff",
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         "Content-Length": Buffer.byteLength(body)
+            //     }
+            // })
+
+            // request.end(body);
+
+
+            // request
+            //     .post(url)
+            //     .send({
+            //         addr: address,
+            //         hex: tx,
+            //     })
+            //     .set('Accept', 'application/json')
+            //     .then(res => {
+            //         console.log('\npost res: ' + res);
+            //     });
+            // sa.post(url)
+            //     .send({
+            //         addr: address,
+            //         hex: tx,
+            //     })
+            //     .end(function(err, res) {
+            //         console.log('\npost res: ' + res);
+            //         //TODO
+            //     });
+            console.log('\n options: ' + JSON.stringify(options));
+
+            // const post_req = http.request(post_options, function(res) {
+            //     res.setEncoding('utf8');
+            //     res.on('data', function(chunk) {
+            //         console.log('Response: ' + chunk);
+            //     });
+            // });
+
+            // // post the data
+            // post_req.write(data);
+            // post_req.end();
+
+            // let xhr = new XMLHttpRequest();
+            // // let url = url;
+            // xhr.open("POST", url, true);
+            // xhr.setRequestHeader("Content-Type", "application/json");
+            // xhr.onreadystatechange = function() {
+            //     if (xhr.readyState === 4 && xhr.status === 200) {
+            //         let json = JSON.parse(xhr.responseText);
+            //         console.log(json.email + ", " + json.password);
+            //     }
+            // };
+            // // let data = JSON.stringify({ "email": "hey@mail.com", "password": "101010" });
+            // xhr.send(options.body);
+
         });
     },
 }
 
+
+// hostname: 'https://' + client.client.host,
+// hostname: url,
+// headers: { 'Content-Type': 'application/json' },
+// url: '/new/sendtx',
+// url: url,
+
+/*
+    전송 성공시
+    POST /new/sendtx HTTP/1.1
+    Host: testnet.bsysexplorer.com
+    Content-Type: application/json
+    User-Agent: PostmanRuntime/7.15.2
+    Accept: *\/*
+    Cache-Control: no-cache
+    Postman-Token: 1edb11c0-09a1-45f2-b672-b5634aebbffd,5579c188-416f-4b3c-8c07-13830d706955
+    Host: testnet.bsysexplorer.com
+    Cookie: __cfduid=d319007f12731bf42bf238c7a949d3ca41563932617
+    Accept-Encoding: gzip, deflate
+    Content-Length: 513
+    Connection: keep-alive
+    cache-control: no-cache
+    {
+    "addr" : "mQxr864raNvYi6mGQhfqTHZLpuaJFcSP1X",
+    "hex" : "0200000001ffff9968418ce05e08bf96a9520ce46bf7500af837f83cc38a725599a27dcb72010000006a473044022009e3f0c10407455f8a333366df72b4d3ae525b280563944cd20a0334377072e402203b755b3c65d715308c00a83703f530bc1112150120211f58576eb728a354758e012103d38f0b4adb628a7cc64379034d046ea45348844f804b3f404de86b6af31e6e6fffffffff02008c8647000000001976a914d7b096cad9d2f0d4e7e04e517c6574a88588bdfa88ac302dfa02000000001976a914605bc6b99db3ac9c9b53b586cc500514c192e17f88ac00000000"
+    }
+*/
 // var http = require('http');
 // var url = require('url');
 // var fs = require('fs');
@@ -354,3 +456,60 @@ module.exports = {
 //     port: client.port,
 //     path: url
 // };zz
+
+
+
+
+
+
+
+
+
+
+
+
+// const request = require('request');
+// const client = require('../models/client');
+
+// module.exports = {
+//     request: function(url) {
+//         return new Promise(resolve => {
+//             request('https://' + client.client.host + url, function(error, response, body) {
+//                 if (error)
+//                     console.error(error);
+//                 resolve(body);
+//             });
+//         });
+//     },
+//     sendTx: function(address, tx) {
+//         return new Promise(resolve => {
+//             console.log('\n http request parameters: ');
+//             console.log('\n address: ' + address);
+//             console.log('\n tx: ' + tx);
+
+//             const url = 'https://' + client.client.host + '/new/sendtx';
+//             const options = {
+//                 headers: { 'Content-Type': 'application/json; charset=utf-8' },
+//                 body: {
+//                     addr: address,
+//                     hex: tx,
+//                 },
+//                 url: url,
+//                 json: true
+//             }
+//             request.post(options, function(error, response, body) {
+//                 console.log('\n url: ' + 'https://' + client.client.host + '/new/sendtx');
+
+//                 if (error)
+//                     console.error('Request post error' + error);
+//                 // console.log('\nresponse: ');
+//                 // console.log(response);
+//                 console.log('\nbody: ');
+//                 console.log(body);
+//                 console.log('\noptions: ');
+//                 console.log(options);
+//                 resolve(body);
+//             });
+//         });
+//     },
+// }z

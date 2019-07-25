@@ -1,54 +1,67 @@
 const bitcoin = require('bitcoinjs-lib');
 const client = require('../models/client')
 
-
-function createAddress(collection, string) {
-
-    // mongoose.connection.collection(collection).insertMany([{ data: string }],
-    const tbsys = client.tbsys;
-    // mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf
-    // mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
-    // addr: mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf
-    // const seed = bip39.mnemonicToSeedSync(mnemonic);
-    // const mnemonic = bip39.generateMnemonic();
-    const mnemonic = string;
-    // console.log(mnemonic);
-    // console.log(JSON.stringify(seed));
-    // const bitcoinNetwork = bitcoin.networks.bitcoin
-    // const bitcoinNetwork = bitcoin.networks.testnet;
+// 데이터베이스 컬렉션 id와 문자를 입력받고 단어를 생성
+// 단어로 비밀번호를 생성 해 비밀번호 입력시마다 비밀번호를 디코딩하고 주소를 찾아내야 하나
+// 이 api에선 비밀번호를 디코딩했다 가정하고 데이터베이스에 저장. 추후에 비밀번호로 로그인 하도록 추가
+function createAddress(collection, string) { // 컬렉션 id와 단어를 입력
+    const tbsys = client.tbsys; // bsys 테스트넷
+    // const mnemonic = string;
     const bitcoinNetwork = tbsys;
     const hdMaster = bitcoin.bip32.fromSeed(seed, bitcoinNetwork);
-    // console.log(JSON.stringify(hdMaster));
     const key1 = hdMaster.derivePath("m/44'/1'/0'/0/0");
     const key2 = hdMaster.derivePath("m/44'/1'/0'/0/1");
-    // console.log('\n key1:' + JSON.stringify(key1));
-    // console.log('\n key2:' + JSON.stringify(key2));
 
     const key1WIF = key1.toWIF();
     const key2WIF = key2.toWIF();
     console.log('\n key1.toWIF():' + key1WIF);
     console.log('\n key2.toWIF():' + key2WIF);
 
-    // console.log('\n key2:' + key2);
     const dstWallet = 'mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd';
     const key1Addr = getAddress(key1, tbsys);
     const key2Addr = getAddress(key2, tbsys);
 
     console.log('\n key1Addr:' + key1Addr);
     console.log('\n key1Addr:' + key2Addr);
-
-    // const alice = bitcoin.ECPair.fromWIF('L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy');
-    // console.log('\nalice: ' + JSON.stringify(alice));
-    // const utxo = '9defc442eab7be8304219c7f6085ba805651753dbbe10f5f8e4b26c5130c30c3';
-
-    // console.log('\nbitcoin.networks.testnet' + JSON.stringify(bitcoin.networks.testnet));
-    // console.log('\ntbsys: ' + JSON.stringify(tbsys));
 }
 
 
 module.exports = mnemonicGenerator;
 
+// mongoose.connection.collection(collection).insertMany([{ data: string }],
 
+
+// mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf
+// mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
+// addr: mQzZ4HAqk9zWBeYbwd9GshD5z2gQJqYnDf
+// const seed = bip39.mnemonicToSeedSync(mnemonic);
+// const mnemonic = bip39.generateMnemonic();
+
+// console.log(mnemonic);
+// console.log(JSON.stringify(seed));
+// const bitcoinNetwork = bitcoin.networks.bitcoin
+// const bitcoinNetwork = bitcoin.networks.testnet;
+
+// console.log(JSON.stringify(hdMaster));
+
+
+// console.log('\n key1:' + JSON.stringify(key1));
+// console.log('\n key2:' + JSON.stringify(key2));
+
+// console.log('\n key2:' + key2);
+
+
+// const alice = bitcoin.ECPair.fromWIF('L1uyy5qTuGrVXrmrsvHWHgVzW9kKdrp27wBC7Vs6nZDTF2BRUVwy');
+// console.log('\nalice: ' + JSON.stringify(alice));
+// const utxo = '9defc442eab7be8304219c7f6085ba805651753dbbe10f5f8e4b26c5130c30c3';
+
+// console.log('\nbitcoin.networks.testnet' + JSON.stringify(bitcoin.networks.testnet));
+// console.log('\ntbsys: ' + JSON.stringify(tbsys));
+
+
+
+
+//===============================================================
 
 // dhttp({
 //     method: 'POST',

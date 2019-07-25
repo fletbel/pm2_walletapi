@@ -1,7 +1,5 @@
-let res = "";
-let req = "";
-
 $(document).ready(function() {
+    //initialize page
     $.ajax({
         type: 'post', //요청 방식
         // url: '/create_address',
@@ -9,14 +7,13 @@ $(document).ready(function() {
         success: function(result) {
             getMnemonicList = result;
             console.log('ajax create address Done');
-            res = result;
             console.log(result);
-            inputWalletHtml(result);
-            getQRcode(result.address);
+            inputWalletHtml(result); // 지갑정보 출력
+            getQRcode(result.address); // qrcode 출력
             // createTx(result.address);
-            getUtxo(result.address);
-            getBalance(result.address);
-            getTxHistory(result.address);
+            getUtxo(result.address); // utxo 가져오기
+            getBalance(result.address); // 잔액 가져오기
+            getTxHistory(result.address); // txhistory 가져오기
             // document.getElementById('list_mnemonic').innerHTML = showMnemonicCheckList(result);
         },
         error: function(err) {
@@ -24,27 +21,31 @@ $(document).ready(function() {
         },
     });
 
-    const getTxHistory = (txList) => {
+    // 서버의 url로 부터 txhistory를 가져와 페이지에 출력하는 함수
+    const getTxHistory = (address) => {
         const getTxHistoryUrl = '/new/gettxlist/';
-        requestData(txList, getTxHistoryUrl).then((result) => {
-            inputTxHistory(result.Contents);
+        requestData(address, getTxHistoryUrl).then((result) => {
+            inputTxHistory(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
+    // 서버의 url로 부터 getBalance 가져와 페이지에 출력하는 함수
     const getBalance = (address) => {
         const getBalanceUrl = '/new/getbalance/';
         requestData(address, getBalanceUrl).then((result) => {
-            inputBalance(result.Contents);
+            inputBalance(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
+    // 서버의 url로 부터 getUtxo 가져와 페이지에 출력하는 함수
     const getUtxo = (address) => {
         const getUtxoURL = '/new/getutxos/';
         requestData(address, getUtxoURL).then((result) => {
-            inputUtxoHtml(result.Contents);
+            inputUtxoHtml(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
+    // 입력받은 tx list 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
     const inputTxHistory = (txList) => {
         const satoshiMultiIdx = 100000000;
         const satoshiLengthIdx = 8;
@@ -59,6 +60,7 @@ $(document).ready(function() {
         document.getElementById('html_txhistory').innerHTML = text;
     }
 
+    // 입력받은 balance 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
     const inputBalance = (balance) => {
         const satoshiLengthIdx = 8;
         let text =
@@ -67,6 +69,7 @@ $(document).ready(function() {
         document.getElementById('html_balance').innerHTML = text;
     }
 
+    // 입력받은 inputUtxoHtml 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
     const inputUtxoHtml = (utxo) => {
         const satoshiMultiIdx = 100000000;
         const satoshiLengthIdx = 8;
@@ -83,6 +86,7 @@ $(document).ready(function() {
         document.getElementById('html_utxo').innerHTML = text;
     }
 
+    // 입력받은 inputWalletHtml 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
     const inputWalletHtml = (walletInfo) => {
         console.log(walletInfo);
         let text = "";
@@ -95,6 +99,7 @@ $(document).ready(function() {
         document.getElementById('html_wallet_info').innerHTML = text;
     }
 
+    // 입력받은 주소, 서버url로 서버로부터 data를 받아 와 promise로 결과값을 resolve하는 함수
     const requestData = (address, url) => {
         return new Promise(resolve => {
             $.ajax({
@@ -117,6 +122,7 @@ $(document).ready(function() {
         });
     }
 
+    // 입력받은 주소로 서버로부터 data를 받아 와 결과를 페이지에 넣는 함수
     function getQRcode(addr) {
         $.ajax({
             type: 'POST', //요청 방식
@@ -134,6 +140,7 @@ $(document).ready(function() {
     }
     // wire(result.address);
 
+    // delete_wallet 버튼 클릭시 서버의 delete_wallet을 호출 해 지갑 삭제
     $('#delete_wallet').on('click', () => {
         $.ajax({
             type: 'get', //요청 방식
@@ -146,7 +153,10 @@ $(document).ready(function() {
             },
         });
     });
+
     // mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
+    // html_wire 버튼 클릭시 서버의 wire 호출 해 웹 페이지의 input에 입력 한 주소와 양을 서버에 전송,
+    // 서버로부터 전송된 결과를 출력
     $('#html_wire').on('click', () => {
         // const wire = () => {
         const addr = document.getElementById('html_input_address').value;
@@ -170,10 +180,13 @@ $(document).ready(function() {
                     console.log('delete Err: ' + JSON.stringify(err));
                 },
             });
-        else
+        else {
             console.log('Error: ' + res.code);
+            alert('입력이 올바르지 않습니다.');
+        }
     });
 
+    //입력받은 주소와 잔액을 검사하는 함수. 특수문자 처리 추가 필요
     const handleWord = (walletAddr, balance) => {
         if (!walletAddr || !balance)
             return {
@@ -192,13 +205,14 @@ $(document).ready(function() {
             };
     }
 
+    // input이 숫자일 시 true, 아니면 false를 반환하는 함수 isNumber
     function isNumber(s) {
         s += ''; // 문자열로 변환
         s = s.replace(/^\s*|\s*$/g, ''); // 좌우 공백 제거
         if (s == '' || isNaN(s)) return false;
         return true;
     }
-    String.prototype.isNumber = function() {
+    String.prototype.isNumber = function() { //string 에 한해서만 isNumber를 검사하는 프로토타입
         return /^\d+$/.test(this);
     };
 });
