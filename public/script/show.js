@@ -1,5 +1,5 @@
-let initMnemonicList = "";
-let getMnemonicList = "";
+// let initMnemonicList = "";
+// let getMnemonicList = "";
 
 let showMnemonicList = (mnemonicList) => {};
 
@@ -15,12 +15,10 @@ function chkWord() {
         dataType: 'json',
         success: function(result) {
             console.log('result' + JSON.stringify(result));
-            if (result.status == 'success') {
+            if (result.status == 'success')
                 alert('success');
-            } else {
+            else
                 alert('failed');
-            }
-
             // initMnemonicList = result;
             // document.getElementById('list_mnemonic').innerHTML = showMnemonicList(result);
         },
@@ -44,7 +42,7 @@ $(document).ready(function() {
             type: 'post', //요청 방식
             url: '/init_mnemonic',
             success: function(result) {
-                initMnemonicList = result;
+                // initMnemonicList = result;
                 console.log('ajax init mnemonic Done');
                 console.log(result);
                 document.getElementById('list_mnemonic').innerHTML = showMnemonicList(result);
@@ -60,7 +58,7 @@ $(document).ready(function() {
             type: 'post', //요청 방식
             url: '/get_mnemonic',
             success: function(result) {
-                getMnemonicList = result;
+                // getMnemonicList = result;
                 console.log('ajax get mnemonic Done');
                 console.log(result);
                 document.getElementById('list_mnemonic').innerHTML = showMnemonicCheckList(result);
@@ -81,7 +79,7 @@ $(document).ready(function() {
             dataType: "json",
             url: '/check_word',
             success: function(result) {
-                getMnemonicList = result;
+                // getMnemonicList = result;
                 console.log('ajax get mnemonic Done');
                 console.log(result);
                 document.getElementById('list_mnemonic').innerHTML = showMnemonicCheckList(result);
@@ -117,8 +115,6 @@ $(document).ready(function() {
         }
         return showList;
     };
-
-    $('#chk_words').on('click', function() {});
 
     $('#gen_words').on('click', function() {
         initMnemonic();

@@ -6,7 +6,6 @@ const mongoose = require('mongoose');
 
 const url = "mongodb://localhost:27017/mydb";
 
-
 function exit() {
     mongoose.disconnect();
     process.exit(0); //정상 종료

@@ -3,8 +3,8 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const client = require('./models/client.js')
-const dhttp = require('dhttp/200.js')
-const http = require('http');
+    // const dhttp = require('dhttp/200.js')
+    // const http = require('http');
 const path = require('path');
 const wallet = require('./public/wallet');
 const mnemonic = require('./public/mnemonic');
@@ -13,12 +13,11 @@ const qr = require('./public/qr');
 const db = require("./libs/database");
 const httpRequest = require("./libs/http");
 
-const mongoose = require('mongoose');
-
-const bitcoin = require('bitcoinjs-lib');
-const bip32 = require('bip32');
-const bip39 = require('bip39');
-const assert = require('assert');
+// const mongoose = require('mongoose');
+// const bitcoin = require('bitcoinjs-lib');
+// const bip32 = require('bip32');
+// const bip39 = require('bip39');
+// const assert = require('assert');
 
 
 
