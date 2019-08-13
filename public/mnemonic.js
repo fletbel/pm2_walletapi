@@ -16,13 +16,6 @@ function mnemonicGenerator() {
 module.exports = mnemonicGenerator;
 
 
-
-
-
-
-
-
-
 // generateMnemonic: () => {
 // generateMnemonic.prototype.addToDB = function() {
 // console.log();
@@ -43,10 +36,6 @@ module.exports = mnemonicGenerator;
 //     const wordsArr = bip39.generateMnemonic().split(' ');
 // }
 // }
-
-
-
-
 
 // const bip39 = require('bip39');
 

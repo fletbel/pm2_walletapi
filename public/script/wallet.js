@@ -22,31 +22,31 @@ $(document).ready(function() {
     });
 
     // 서버의 url로 부터 txhistory를 가져와 페이지에 출력하는 함수
-    const getTxHistory = (address) => {
+    const getTxHistory = function(address) {
         const getTxHistoryUrl = '/new/gettxlist/';
-        requestData(address, getTxHistoryUrl).then((result) => {
+        requestData(address, getTxHistoryUrl).then(function(result) {
             inputTxHistory(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
     // 서버의 url로 부터 getBalance 가져와 페이지에 출력하는 함수
-    const getBalance = (address) => {
+    const getBalance = function(address) {
         const getBalanceUrl = '/new/getbalance/';
-        requestData(address, getBalanceUrl).then((result) => {
+        requestData(address, getBalanceUrl).then(function(result) {
             inputBalance(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
     // 서버의 url로 부터 getUtxo 가져와 페이지에 출력하는 함수
-    const getUtxo = (address) => {
+    const getUtxo = function(address) {
         const getUtxoURL = '/new/getutxos/';
-        requestData(address, getUtxoURL).then((result) => {
+        requestData(address, getUtxoURL).then(function(result) {
             inputUtxoHtml(result.Contents); //가져온 데이터 페이지에 출력
         })
     }
 
     // 입력받은 tx list 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
-    const inputTxHistory = (txList) => {
+    const inputTxHistory = function(txList) {
         const satoshiMultiIdx = 100000000;
         const satoshiLengthIdx = 8;
         let text = '<p>* Tx History</p>';
@@ -61,7 +61,7 @@ $(document).ready(function() {
     }
 
     // 입력받은 balance 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
-    const inputBalance = (balance) => {
+    const inputBalance = function(balance) {
         const satoshiLengthIdx = 8;
         let text =
             '<p>* Balance </p>' +
@@ -70,7 +70,7 @@ $(document).ready(function() {
     }
 
     // 입력받은 inputUtxoHtml 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
-    const inputUtxoHtml = (utxo) => {
+    const inputUtxoHtml = function(utxo) {
         const satoshiMultiIdx = 100000000;
         const satoshiLengthIdx = 8;
         let text = '<p>* UTXO</p>';
@@ -87,7 +87,7 @@ $(document).ready(function() {
     }
 
     // 입력받은 inputWalletHtml 로 부터 변수 text에 html텍스트를 담아 페이지에 출력하는 함수
-    const inputWalletHtml = (walletInfo) => {
+    const inputWalletHtml = function(walletInfo) {
         console.log(walletInfo);
         let text = "";
         text +=
@@ -100,8 +100,8 @@ $(document).ready(function() {
     }
 
     // 입력받은 주소, 서버url로 서버로부터 data를 받아 와 promise로 결과값을 resolve하는 함수
-    const requestData = (address, url) => {
-        return new Promise(resolve => {
+    const requestData = function(address, url) {
+        return new Promise(function(resolve) {
             $.ajax({
                 type: 'post', //요청 방식
                 // url: '/create_address',
@@ -141,7 +141,7 @@ $(document).ready(function() {
     // wire(result.address);
 
     // delete_wallet 버튼 클릭시 서버의 delete_wallet을 호출 해 지갑 삭제
-    $('#delete_wallet').on('click', () => {
+    $('#delete_wallet').on('click', function() {
         $.ajax({
             type: 'get', //요청 방식
             url: '/delete_wallet',
@@ -157,7 +157,7 @@ $(document).ready(function() {
     // mZRU2bUvApJ1k2rcQY6BJBwMTgWki8HKmd
     // html_wire 버튼 클릭시 서버의 wire 호출 해 웹 페이지의 input에 입력 한 주소와 양을 서버에 전송,
     // 서버로부터 전송된 결과를 출력
-    $('#html_wire').on('click', () => {
+    $('#html_wire').on('click', function() {
         // const wire = () => {
         const addr = document.getElementById('html_input_address').value;
         const balance = document.getElementById('html_input_balance').value;
@@ -187,7 +187,7 @@ $(document).ready(function() {
     });
 
     //입력받은 주소와 잔액을 검사하는 함수. 특수문자 처리 추가 필요
-    const handleWord = (walletAddr, balance) => {
+    const handleWord = function(walletAddr, balance) {
         if (!walletAddr || !balance)
             return {
                 status: false,
@@ -215,6 +215,21 @@ $(document).ready(function() {
     String.prototype.isNumber = function() { //string 에 한해서만 isNumber를 검사하는 프로토타입
         return /^\d+$/.test(this);
     };
+
+
+    $.ajax({
+        type: 'get', //요청 방식
+        url: '/process',
+        dataType: 'json',
+        success: function(result) {
+            console.log('process done!');
+            console.log(result);
+        },
+        error: function(err) {
+            console.log('process Err: ' + JSON.stringify(err));
+        },
+    });
+
 });
 
 

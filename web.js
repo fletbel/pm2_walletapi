@@ -243,6 +243,37 @@ app.post('/get_balance', function(req, res) {
     });
 });
 
+app.get('/process', function(req, res) {
+    callThread();
+    res.json('success');
+});
+
+
+
+function getNumber(id, num) {
+    const idx = 9999;
+    for (let i = num; i < idx; i++) {
+        console.log(id + ' i: ' + i);
+        if (i == idx - 1) {
+            return i;
+        }
+        i += i;
+    }
+}
+
+function callThread() {
+    console.log(process.env);
+
+    getNumber('id: 1', 1);
+    getNumber('id: 2', 2);
+    getNumber('id: 3', 3);
+    getNumber('id: 4', 4);
+}
+
+
+
+
+
 
 app.listen(8123, () => {
     console.log('Listening on port 8123');
